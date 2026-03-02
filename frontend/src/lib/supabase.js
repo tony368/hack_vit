@@ -1,6 +1,34 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = "https://dlprtzxwaxgeofaaocdy.supabase.co";
-const supabaseKey = "sb_publishable_lvb59KLaahJ0P0btaaxa1w_HMkDsbEi";
+const supabaseUrl     = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export const supabase = (supabaseUrl && supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null
+
+export const hasSupabase = !!supabase
+
+/*
+  ── Supabase SQL schema ──────────────────────────────────────
+  Run this in your Supabase SQL editor:
+
+  create table assets (
+    id                    uuid primary key default gen_random_uuid(),
+    lat                   float8 not null,
+    lng                   float8 not null,
+    type                  text check (type in ('Lamp','Road','Water Line')) not null,
+    condition             text check (condition in ('Good','Defective','Critical')) not null,
+    status                text,
+    zone                  text,
+    installation_date     date,
+    last_maintenance_date date,
+    created_at            timestamptz default now()
+  );
+
+  create unique index assets_lat_lng_idx
+    on assets (round(lat::numeric,5), round(lng::numeric,5));
+
+  alter table assets enable row level security;
+  create policy "Allow all" on assets for all using (true);
+*/
